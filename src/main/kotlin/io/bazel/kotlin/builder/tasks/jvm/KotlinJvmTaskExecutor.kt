@@ -105,6 +105,8 @@ class KotlinJvmTaskExecutor @Inject internal constructor(
             "-Xfriend-paths=${friendPaths.joinToString(File.pathSeparator)}"
         )
 
+        println("Inputs: ${inputs}")
+
         args
             .addAll("-module-name", info.moduleName)
             .addAll("-d", directories.classes)
@@ -170,6 +172,7 @@ class KotlinJvmTaskExecutor @Inject internal constructor(
      * Compiles Kotlin sources to classes. Does not compile Java sources.
      */
     private fun JvmCompilationTask.compileKotlin(context: CompilationTaskContext, printOnFail: Boolean = true) =
+
         getCommonArgs().let { args ->
             args.addAll(inputs.javaSourcesList)
             args.addAll(inputs.kotlinSourcesList)

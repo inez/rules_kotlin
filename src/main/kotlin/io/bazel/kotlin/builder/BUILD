@@ -21,6 +21,7 @@ kt_bootstrap_library(
         "utils/**/*.kt",
     ]),
     deps = [
+        #"@com_github_jetbrains_kotlin//:WHATXXXX",
         "//src/main/protobuf:deps",
         "//src/main/protobuf:kotlin_model",
         "//src/main/protobuf:worker",
@@ -45,6 +46,7 @@ java_library(
         "//src/main/protobuf:kotlin_model",
         "//third_party:dagger",
         "@com_github_jetbrains_kotlin//:annotations",
+        #"@com_github_jetbrains_kotlin//:WHATXXXX",
         "@com_github_jetbrains_kotlin//:kotlin-stdlib",
         "@io_bazel_rules_kotlin_com_google_protobuf_protobuf_java//jar",
     ],

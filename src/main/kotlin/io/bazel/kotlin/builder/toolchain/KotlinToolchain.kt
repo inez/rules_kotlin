@@ -27,6 +27,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.*
 
 class KotlinToolchain private constructor(
     val kotlinHome: Path,
@@ -121,7 +122,21 @@ class KotlinToolchain private constructor(
         // 2 is an internal error
         // 3 is the script execution error
         fun compile(args: Array<String>, out: PrintStream): Int {
-            val exitCodeInstance = execMethod.invoke(compiler, out, args)
+
+            // RuntimeException().printStackTrace();
+
+            val list = args.toMutableList()
+            if (!list.contains("-Xplugin=/Users/inez/Development/kotlin-compiler/kotlinc/lib/android-extensions-compiler.jar")) {
+                println("adding it...")
+                list.add("-Xplugin=/Users/inez/Development/kotlin-compiler/kotlinc/lib/android-extensions-compiler.jar")
+                list.add("-P")
+                list.add("plugin:org.jetbrains.kotlin.android:experimental=true");
+
+                // if any in the classpath has:
+                ///kotlin-android-extensions-runtime-1.3.31.jar
+            }
+
+            val exitCodeInstance = execMethod.invoke(compiler, out, list.toTypedArray())
             return getCodeMethod.invoke(exitCodeInstance, *NO_ARGS) as Int
         }
     }

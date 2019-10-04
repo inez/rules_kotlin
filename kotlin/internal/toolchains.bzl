@@ -125,6 +125,7 @@ _kt_toolchain = rule(
         "jvm_stdlibs": attr.label_list(
             doc = "The jvm stdlibs. This is internal.",
             default = [
+                #Label("@" + _KT_COMPILER_REPO + "//:WHATXXXX"),
                 Label("@" + _KT_COMPILER_REPO + "//:annotations"),
                 Label("@" + _KT_COMPILER_REPO + "//:kotlin-stdlib"),
                 Label("@" + _KT_COMPILER_REPO + "//:kotlin-stdlib-jdk7"),

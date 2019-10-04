@@ -21,6 +21,8 @@ import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
 import java.util.*
 
+const val KOTLIN_EXTENSIONS_OPTION = "plugin:org.jetbrains.kotlin.android:"
+
 // TODO(hs) move the kapt specific stuff to the JVM package.
 class KotlinCompilerPluginArgsEncoder(
     private val jarPath: String,
@@ -60,6 +62,8 @@ class KotlinCompilerPluginArgsEncoder(
         }
     }
 
+    // val ANDROID_EXTENSION_JAR = "external/org_jetbrains_kotlin_kotlin_android_extensions/maven/org/jetbrains/kotlin/kotlin-android-extensions/1.3.31/kotlin-android-extensions-1.3.31.jar"
+    
     /**
      * Plugin using the undocumented encoding format for kapt3
      */
@@ -77,10 +81,28 @@ class KotlinCompilerPluginArgsEncoder(
 
         // "configuration" is an undocumented kapt3 argument. preparing the arguments this way is the only way to get more than one annotation processor class
         // passed to kotlinc.
-        fun encode(): List<String> = listOf(
-            "-Xplugin=$jarPath",
-            "-P", "plugin:$pluginId:configuration=${encodeMultiMap(tally)}"
-        )
+        fun encode(): List<String> {
+            val plugins = mutableListOf<String>()
+            val params = mutableListOf<String>()
+            if (tally.get("processors")?.first()?.isNotEmpty() ?: false) {
+                // use kapt3
+                plugins.add(jarPath)
+                params.add("-P")
+                params.add("plugin:$pluginId:configuration=${encodeMultiMap(tally)}")
+            }   
+            // val extension_jar = tally.get("apclasspath")?.firstOrNull { it.contains("kotlin-android-extensions") }            
+            // extension_jar?.apply {
+                // plugins.add(this)
+                // plugins.add("/Users/inez/Development/kotlin-compiler/kotlinc/lib/android-extensions-compiler.jar")
+
+                // params.add("-P")
+                // params.add("plugin:org.jetbrains.kotlin.android:experimental=true")
+                // params.add("-P")
+                // params.add("plugin:org.jetbrains.kotlin.android:package=com.squareup.container")
+            // }
+            println("Plugin jars: ${plugins.joinToString(",")}")
+            return listOf("-Xplugin=${plugins.joinToString(",")}") + params;
+        }
     }
 
     fun encode(context: CompilationTaskContext, task: JvmCompilationTask): List<String> {
@@ -90,6 +112,8 @@ class KotlinCompilerPluginArgsEncoder(
         val d = task.directories
         return if (task.inputs.processorsList.isNotEmpty()) {
             PluginArgs().let { arg ->
+                println("generatedSources: ${d.generatedSources.toString()}")
+                println("generatedClasses: ${d.generatedClasses.toString()}")
                 arg["sources"] = d.generatedSources.toString()
                 arg["classes"] = d.generatedClasses.toString()
                 arg["stubs"] = d.temp.toString()
@@ -101,8 +125,8 @@ class KotlinCompilerPluginArgsEncoder(
                     arg["verbose"] = "true"
                 }
                 arg["processors"] = task.inputs.processorsList.joinToString(",")
-                task.inputs.processorpathsList.forEach { arg.bindMulti("apclasspath", it) }
-                arg.encode()
+                task.inputs.processorpathsList.forEach { arg.bindMulti("apclasspath", it) }.also { println(it) }
+                arg.encode().also { println(it) }
             }
         } else {
             emptyList()

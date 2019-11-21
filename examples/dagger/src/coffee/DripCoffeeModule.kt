@@ -15,16 +15,30 @@
  */
 package coffee
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
-
+import heating.ElectricHeater
+import heating.Heater
 import javax.inject.Singleton
+import pumping.PumpModule
+import time.Delayer
 
-@Module(includes = arrayOf(PumpModule::class))
+@Module(includes = arrayOf(PumpModule::class, Bindings::class))
 internal class DripCoffeeModule {
     @Provides
     @Singleton
-    fun provideHeater(): Heater {
-        return ElectricHeater()
+    fun provideDelayer(): Delayer {
+        return object : Delayer {
+            override fun delay() {
+                Thread.sleep(1000)
+            }
+        }
     }
+}
+
+@Module
+internal abstract class Bindings {
+    @Binds @Singleton
+    internal abstract fun bindHeater(heater: ElectricHeater): Heater
 }
